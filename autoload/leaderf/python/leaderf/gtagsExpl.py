@@ -8,6 +8,8 @@ import os.path
 import shutil
 import itertools
 import subprocess
+import traceback
+import shutil
 from .utils import *
 from .explorer import *
 from .manager import *
@@ -80,9 +82,15 @@ class GtagsExplorer(Explorer):
 
         if vim.current.buffer.name:
             filename = os.path.normpath(lfDecode(vim.current.buffer.name))
+            # print("os:",subprocess.getoutput(f"cygpath -m {filename}") ,"\nfilename:", filename, "\nbuffername:", vim.current.buffer.name, file=open('d:/tmp/bfname.txt', 'w', encoding='utf-8'))
         else:
             filename = os.path.join(lfGetCwd(), 'no_name')
 
+        # status, output = subprocess.getstatusoutput(f"which cygpath")
+        # path = subprocess.getoutput(f"cygpath -m {path}") if shutil.which("cygpath") else path
+        # path = subprocess.getoutput(f"cygpath -m {filename}") if status == 0 else path
+        # filename = subprocess.getoutput(f"cygpath -m {filename}") if shutil.which("cygpath") else filename
+        # print("os:",subprocess.getoutput(f"cygpath -m {filename}") ,"\nfilename:", filename, "\nbuffername:", vim.current.buffer.name, file=open('d:/tmp/bfname.txt', 'w', encoding='utf-8'))
         if "--gtagsconf" in arguments_dict:
             self._gtagsconf = arguments_dict["--gtagsconf"][0]
         if "--gtagslabel" in arguments_dict:
@@ -399,6 +407,15 @@ class GtagsExplorer(Explorer):
             return False
 
     def _generateDbpath(self, path):
+        # print("path: ",path,"\nwhich:", shutil.which("cygpath"), file=open("d:/tmp/_generateDbpath.txt", 'w', encoding='utf-8'))
+        # status, output = subprocess.getstatusoutput(f"which cygpath")
+        # path = subprocess.getoutput(f"cygpath -m {path}") if shutil.which("cygpath") else path
+        # path = output if status == 0 else path
+        # if status == 0: 
+        #     path = subprocess.getoutput(f"cygpath -m {path}") 
+        #     self._db_location = subprocess.getoutput(f"cygpath -m {self._db_location}")
+        # 仅在 Cygwin 环境中尝试获取 Windows 风格路径
+        # https://deepwiki.com/search/gtags_6b44ab53-5c0e-43d4-9357-023a07eafe5b?mode=fast
         if sys.platform == "cygwin":
             result = subprocess.run(["cygpath", "-m", path], capture_output=True, text=True)
             path = result.stdout.strip() if result.returncode == 0 else path
@@ -423,6 +440,8 @@ class GtagsExplorer(Explorer):
             # if not exist root marker, store in project
             return os.path.join(path, '.LfGtags')
         else:
+            # stack_info = traceback.format_stack() 
+            # print("path: ",path, "\nos.path.dblocation.dbfolder:", os.path.join(self._db_location, db_folder), "\ndbfolder: ", db_folder, "traceStack: ", stack_info,file=open("d:/tmp/dbfold.txt", 'w', encoding='utf-8'))
             return os.path.join(self._db_location, db_folder)
 
     def _root_dbpath(self, filename):
@@ -448,6 +467,7 @@ class GtagsExplorer(Explorer):
         return (root, dbpath, os.path.exists(os.path.join(dbpath, "GTAGS")))
 
     def updateGtags(self, filename, single_update, auto):
+        # print("updateGtags- path: ",filename, file=open("d:/tmp/updateGtags.txt", 'w', encoding='utf-8'))
         self._task_queue.put(partial(self._update, filename, single_update, auto))
 
     def _isDBModified(self, dbpath):
@@ -490,6 +510,7 @@ class GtagsExplorer(Explorer):
         if self._gtagsconf == '' and os.name == 'nt':
             self._gtagsconf = os.path.normpath(os.path.join(self._which("gtags.exe"), "..", "share", "gtags", "gtags.conf")).join('""')
 
+        # print("_update - path: ", filename, file=open("d:/tmp/update_filename.txt", 'w', encoding='utf-8'))
         root, dbpath, exists = self._root_dbpath(filename)
         if not filename.startswith(root):
             # if self._has_nvim:

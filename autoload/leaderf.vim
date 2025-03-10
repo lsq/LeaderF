@@ -629,6 +629,8 @@ endfunction
 function! leaderf#Quit(manager_id) abort
 exec g:Lf_py "<< EOF"
 import ctypes
+intvalue = int(vim.eval("a:manager_id"))
+vim.command(f'echoerr "{intvalue} - type: {type(intvalue)}"')
 manager = ctypes.cast(int(vim.eval("a:manager_id")), ctypes.py_object).value
 if manager.is_ctrl_c == False:
     manager.is_autocmd = True
