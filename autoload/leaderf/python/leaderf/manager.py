@@ -60,7 +60,10 @@ def modifiableController(func):
     def deco(self, *args, **kwargs):
         self._getInstance().buffer.options['modifiable'] = True
         func(self, *args, **kwargs)
-        self._getInstance().buffer.options['modifiable'] = False
+        try:
+            self._getInstance().buffer.options['modifiable'] = False
+        except:
+            pass
     return deco
 
 def catchException(func):
@@ -132,6 +135,7 @@ class Manager(object):
         self._orig_source = None
         self._preview_config = {}
         self.is_autocmd = False
+        self.is_ctrl_c = False
         self._circular_scroll = lfEval("get(g:, 'Lf_EnableCircularScroll', 0)") == '1'
         if lfEval("has('patch-8.1.1615') || has('nvim-0.5.0')") == '0':
             lfCmd("let g:Lf_PreviewInPopup = 0")
@@ -3013,8 +3017,8 @@ class Manager(object):
 
                     self._getInstance().setStlResultsCount(len(self._content))
 
-                    if not self.isPreviewWindowOpen():
-                        self._previewResult(False)
+                if not self.isPreviewWindowOpen():
+                    self._previewResult(False)
 
                 if self._getInstance().getWinPos() not in ('popup', 'floatwin'):
                     lfCmd("redrawstatus")

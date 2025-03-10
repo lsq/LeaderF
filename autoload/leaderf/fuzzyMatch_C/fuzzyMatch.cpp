@@ -252,6 +252,7 @@ ValueElements* evaluate_nameOnly(TextContext* pText_ctxt,
         }
         if ( bits == 0 )
         {
+            memset(val, 0, sizeof(ValueElements));
             return val;
         }
         else
@@ -348,10 +349,6 @@ ValueElements* evaluate_nameOnly(TextContext* pText_ctxt,
                     {
                         score = prefix_score + pVal->score - 0.2f * (pVal->beg - i);
                         end_pos = pVal->end;
-                    }
-                    else
-                    {
-                        break;
                     }
                 }
             }
